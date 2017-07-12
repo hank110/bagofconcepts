@@ -20,7 +20,8 @@ Weighting scheme (Concept Frequency - Inverse Frequency) is applied.
 
 1. Input document must be pre-processed in a way that each line of the document file contains a single document.
 2. Import the package and use create_boc function
-3. function parameters: create_boc(input document path, word2vec dimension, word2vec window size, minimum frequency threshold, number of concepts to be generated)
+3. function parameters: 
+   create_boc(input document path, word2vec dimension, word2vec window size, minimum frequency threshold, number of concepts to be generated)
 
 
 
