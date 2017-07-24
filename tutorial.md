@@ -39,4 +39,4 @@ boc.create_boc(document_path, dim, contxt, min_freq, num_concepts)
 - 'boc_d200_w8_mf10_c100.csv' contains actual BOC document vectors for the input document
 
 ### 5. Through using the generated document vectors as inputs, document classifiers can be trained such as listed in the paper
- 
+- SVM (support vector machine) will be used to classify the documents 
