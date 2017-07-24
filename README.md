@@ -24,4 +24,4 @@ Weighting scheme (Concept Frequency - Inverse Frequency) is applied.
    create_boc(input document path, word2vec dimension, word2vec window size, minimum frequency threshold, number of concepts to be generated)
 4. Output files: BOC document vectors, Word-Concept Mapper (all in csv)
 
-
+Please refer to tutorial.md for detailed explaination of this package's usage
