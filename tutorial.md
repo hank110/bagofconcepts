@@ -5,12 +5,12 @@
 
 ### 1. Import the package and designate the location of the input text file.
 
-- Sample text file contains 1,000 articles from Reuter dataset used by the paper.
+- Sample text file contains 5,000 articles from Reuter dataset used by the paper.
 
 ``` python
 import create_boc as boc
 
-document_path='./sample_articles.txt'
+document_path='./sample_data/sample_articles.txt'
 ```
 
 ### 2. Set parameters for training BOC
@@ -39,4 +39,40 @@ boc.create_boc(document_path, dim, contxt, min_freq, num_concepts)
 - 'boc_d200_w8_mf10_c100.csv' contains actual BOC document vectors for the input document
 
 ### 5. Through using the generated document vectors as inputs, document classifiers can be trained such as listed in the paper
-- SVM (support vector machine) will be used to classify the documents 
+- Using the sample articles and labels, SVM (support vector machine) will be trained to classify the documents
+- First 4,000 articles will be used as a training data, while the rest of 1,000 articles will be used as a test data
+- 10 Fold Cross Validation is applied to search for the optimal SVM model amongst various combinations of parameters (e.g kernel type, regularization terms) 
+- F1 score of prediction from test set will be printed
+
+
+```python
+from numpy import genfromtxt
+from sklearn.metrics import f1_score
+from sklearn.model_selection import GridSearchCV
+from sklearn import svm
+
+
+BOC_matrix=genfromtxt('boc_d200_w8_mf10_c100.csv', delimiter=',')
+
+with open('./sample_data/sample_labels.txt') as f:
+    labels=[]
+    for line in f:
+        labels.append(line)
+
+X_train=BOC_matrix[0:4000]
+X_test=BOC_matrix[4000:]
+Y_train=labels[0:4000]
+Y_test=labels[4000:0]
+
+krnl=['linear', 'poly', 'rbf']
+for ek in krnl:
+    parameters={'C':[0.5, 1, 10, 100], 'gamma':[0.001, 0.0001]}
+    svr=svm.SVC(kernel=ek,decision_function_shape='ovr')
+    clf1=GridSearchCV(svr, parameters, cv=10, n_jobs=3)
+    clf1.fit(X_train, Y_train)
+    print(clf1.best_score_)
+    print(clf1.best_params_)
+
+    yhat=clf1.predict(X_test)
+    print(f1_score(Y_test, yhat, average='micro'))
+```
