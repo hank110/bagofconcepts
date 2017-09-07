@@ -21,7 +21,7 @@ def train_w2v(doc_path, dim, win, freq, save=0):
     sent=gensim.models.word2vec.LineSentence(doc_path)
     model=gensim.models.Word2Vec(sent,size=dim,window=win,min_count=freq,sg=1)
     if (save==1):
-        modelnm=conf.model_nam+"_d%d_w%d" %(ed,ew)
+        modelnm="w2v_model_d%d_w%d" %(dim,win)
         model.wv.save_word2vec_format(modelnm, fvocab=None, binary=False)
         print (".... %s created" %modelnm)
     return model
