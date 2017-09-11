@@ -20,12 +20,13 @@ document_path='./sample_data/sample_articles.txt'
 - Window size of context indicates the size of window that is regarded as contextual words for a given word
 - Words with frequencies below minimum frequency will be disregarded for training
 - Number of concepts indicate the value of K used for spherical clustering, indicating the dimension of created documents vectors
+- If you want to train BOC models with various size of embedding dimensions and number of concepts, you can add those hyperparameters within the list
 
 ```python
-dim=200
+dim=[200]
 contxt=8
 min_freq=10
-num_concept=100
+num_concept=[100]
 ```
 
 ### 3. Train document vectors using BOC

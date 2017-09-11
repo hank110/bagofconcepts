@@ -119,7 +119,9 @@ def create_boc(doc_path,dim,win,freq,num_concept):
 
 
 def main():
-    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
+    for dim in conf.dimensions:
+        for cp in conf.num_concepts:
+            create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
 
 
 if __name__ == "__main__":
