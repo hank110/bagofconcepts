@@ -20,13 +20,13 @@ document_path='./sample_data/sample_articles.txt'
 - Window size of context indicates the size of window that is regarded as contextual words for a given word
 - Words with frequencies below minimum frequency will be disregarded for training
 - Number of concepts indicate the value of K used for spherical clustering, indicating the dimension of created documents vectors
-- If you want to train BOC models with various size of embedding dimensions and number of concepts, you can add those hyperparameters within the list
+- If you want to train BOC models with various size of embedding dimensions and number of concepts, you can add those multiple hyperparameters within the list
 
 ```python
 dim=[200]
 contxt=8
 min_freq=10
-num_concept=[100]
+num_concept=[100, 200]
 ```
 
 ### 3. Train document vectors using BOC
@@ -36,8 +36,8 @@ boc.create_boc(document_path, dim, contxt, min_freq, num_concepts)
 ```
 
 ### 4. Two output files will be created
-- 'w2c_d200_w8_mf10_c100.csv' contains information about each word's assigned concept
-- 'boc_d200_w8_mf10_c100.csv' contains actual BOC document vectors for the input document
+- 'w2c_d200_w8_mf10_c100.csv' and 'w2c_d200_w8_mf10_c200.csv' contain information about each word's assigned concept
+- 'boc_d200_w8_mf10_c100.csv' and 'boc_d200_w8_mf10_c200.csv' contain actual BOC document vectors for the input document
 
 ### 5. Through using the generated document vectors as inputs, document classifiers can be trained such as listed in the paper
 - Using the sample articles and labels, SVM (support vector machine) will be trained to classify the documents
