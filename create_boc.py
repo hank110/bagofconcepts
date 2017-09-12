@@ -105,23 +105,24 @@ def create_boc(doc_path,dim,win,freq,num_concept):
     '''
     Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts
     '''
-    model=train_w2v(doc_path,dim,win,freq)
-    wlist=get_tokens(doc_path,freq) 
-    wM=get_wordvectors(model,wlist)
-    w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
-    boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
-    word2concept=create_concepts(wM,wlist,w2c_output,num_concept) 
-    boc=apply_cfidf(doc_path,word2concept,num_concept)
-    np.savetxt(boc_output, boc, delimiter=",")
-    print(".... BOC vectors created in %s" %boc_output)
-    parameters=namedtuple('parameters','document_path dimension window_size min_freq num_concept')
-    return parameters(doc_path,dim,win,freq,num_concept)
+    all_param=[]
+    for edim in dim:
+        model=train_w2v(doc_path,edim,win,freq)
+        wlist=get_tokens(doc_path,freq) 
+        wM=get_wordvectors(model,wlist)
+        for ecp in num_concpt:
+            w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
+            boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
+            word2concept=create_concepts(wM,wlist,w2c_output,num_concept) 
+            boc=apply_cfidf(doc_path,word2concept,num_concept)
+            np.savetxt(boc_output, boc, delimiter=",")
+            print(".... BOC vectors created in %s" %boc_output)
+            all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
+    return all_param
 
 
 def main():
-    for dim in conf.dimensions:
-        for cp in conf.num_concepts:
-            create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
+    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
 
 
 if __name__ == "__main__":
