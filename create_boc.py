@@ -101,11 +101,12 @@ def apply_cfidf(doc_path, word2concept, num_concept):
     return transform_tfidf(np.array(boc_matrix))
 
 
-def create_boc(doc_path,dim,win,freq,num_concept):
+def apply_boc(doc_path,dim,win,freq,num_concept,model_path):
     '''
     Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts
     '''
     all_param=[]
+    #if len(model_path)>0: create_boc_existing_w2v()
     for edim in dim:
         model=train_w2v(doc_path,edim,win,freq)
         wlist=get_tokens(doc_path,freq) 
@@ -121,8 +122,15 @@ def create_boc(doc_path,dim,win,freq,num_concept):
     return all_param
 
 
+def create_boc(doc_path,dim,win,freq,num_concept,model_path):
+    '''
+    Creates boc vectors from either training new w2v models or calling existing pretrained w2v models
+   '''
+    return all_param
+
+
 def main():
-    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
+    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts,conf.w2v_model)
 
 
 if __name__ == "__main__":

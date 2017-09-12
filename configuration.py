@@ -6,4 +6,5 @@ document='/home/hank/Backup_data/data/r52-test-all-terms.txt'
 dimensions=[300]	
 context=6				
 min_freq=20
-num_concepts=[70] 						
+num_concepts=[70]
+w2v_model=[] 						
