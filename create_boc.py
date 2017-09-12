@@ -111,8 +111,8 @@ def create_boc(doc_path,dim,win,freq,num_concept):
         wlist=get_tokens(doc_path,freq) 
         wM=get_wordvectors(model,wlist)
         for ecp in num_concpt:
-            w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
-            boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(dim),str(win),str(freq),str(num_concept))
+            w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(edim),str(win),str(freq),str(ecp))
+            boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(edim),str(win),str(freq),str(ecp))
             word2concept=create_concepts(wM,wlist,w2c_output,num_concept) 
             boc=apply_cfidf(doc_path,word2concept,num_concept)
             np.savetxt(boc_output, boc, delimiter=",")
