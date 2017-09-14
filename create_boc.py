@@ -101,12 +101,11 @@ def apply_cfidf(doc_path, word2concept, num_concept):
     return transform_tfidf(np.array(boc_matrix))
 
 
-def apply_boc(doc_path,dim,win,freq,num_concept,model_path):
+def create_boc_w2v_train(doc_path,dim,win,freq,num_concept):
     '''
-    Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts
+    Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously
     '''
     all_param=[]
-    #if len(model_path)>0: create_boc_existing_w2v()
     for edim in dim:
         model=train_w2v(doc_path,edim,win,freq)
         wlist=get_tokens(doc_path,freq) 
@@ -122,15 +121,29 @@ def apply_boc(doc_path,dim,win,freq,num_concept,model_path):
     return all_param
 
 
-def create_boc(doc_path,dim,win,freq,num_concept,model_path):
+def create_boc_w2v_load(models,doc_path,win,freq,num_concept,model_path):
     '''
-    Creates boc vectors from either training new w2v models or calling existing pretrained w2v models
-   '''
+    Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously    
+    '''
+    all_param=[]
+    for em in models:
+        em_name=em.split("/")[-1]
+        model=KeyedVectors.load_word2vec_format(em)
+        wlist=get_tokens(doc_path,freq) 
+        wM=get_wordvectors(model,wlist)
+        for ecp in num_concpt:
+            w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
+            boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
+            word2concept=create_concepts(wM,wlist,w2c_output,num_concept) 
+            boc=apply_cfidf(doc_path,word2concept,num_concept)
+            np.savetxt(boc_output, boc, delimiter=",")
+            print(".... BOC vectors created in %s" %boc_output)
+            all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
     return all_param
 
 
 def main():
-    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts,conf.w2v_model)
+    create_boc(conf.document,conf.dimensions,conf.context,conf.min_freq,conf.num_concepts)
 
 
 if __name__ == "__main__":
