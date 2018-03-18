@@ -10,14 +10,23 @@ Weighting scheme (Concept Frequency - Inverse Frequency) is applied.
 
 ## Requirements:
 
-- Python 3.5.2
-- gensim 2.1.0
-- numpy 1.11.0
-- spherecluster 0.1.2
-- sklearn 0.17.1
+- Python 3.x
+- gensim >= 2.1.0
+- numpy >= 1.11.0
+- spherecluster >= 0.1.2
+- sklearn >= 0.17.1
+
+## Basic Usage
+```
+import boc
+
+boc_object = boc.BOC(document_path, w2v dimension, context size, minimum frequency, number of concepts)
+boc_object.create_boc_w2v_train()
+```
+
 
 ## Tutorial Examples:
-
+(To be updated soon)
 1. Input document must be pre-processed in a way that each line of the document file contains a single document.
 2. Import the package and use create_boc function
 3. function parameters: 
