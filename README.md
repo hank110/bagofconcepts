@@ -25,12 +25,4 @@ boc_object.create_boc_w2v_train()
 ```
 
 
-## Tutorial Examples:
-(To be updated soon)
-1. Input document must be pre-processed in a way that each line of the document file contains a single document.
-2. Import the package and use create_boc function
-3. function parameters: 
-   create_boc(input document path, word2vec dimension, word2vec window size, minimum frequency threshold, number of concepts to be generated)
-4. Output files: BOC document vectors, Word-Concept Mapper (all in csv)
-
-Please refer to tutorial.md for detailed explaination of this package's usage
+Please refer to **tutorial.ipynb** for detailed explaination of this package's usage
