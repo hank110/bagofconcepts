@@ -1,6 +1,6 @@
 # Bag-of-Concepts
 
-This is python implementation of Bag-of-Concepts, as proposed by the paper "Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho) 
+This is python implementation of Bag-of-Concepts, as proposed by the paper ["Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho)](https://www.sciencedirect.com/science/article/pii/S0925231217308962)
 
 For a given text data, it trains word2vec vectors for each of the words and clusters semantically similar words into a common "concept".
 
