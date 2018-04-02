@@ -19,7 +19,7 @@ class BOC():
         self.num_concept=num_concept
 
 
-    def train_w2v(self, save=1):
+    def _train_w2v(self, save=1):
         '''
         Input: Training document file, dimension of W2V, window size, minimum word frequency
         Output: W2V model; not saved as default
@@ -36,7 +36,7 @@ class BOC():
         return model
 
 
-    def get_tokens(self):
+    def _get_tokens(self):
         '''
         Input: Training document file
         output: List of words that occur more frequently than the minimum frequency threshold
@@ -59,7 +59,7 @@ class BOC():
         return wdlist
 
 
-    def get_wordvectors(self, model, wlist):
+    def _get_wordvectors(self, model, wlist):
         '''
         Input: W2V model, list of words above minimum frequency
         Output: W2V Matrix
@@ -70,7 +70,7 @@ class BOC():
         return np.array(w2v)
 
 
-    def create_concepts(self, w2vM, wlist, output_path):
+    def _create_concepts(self, w2vM, wlist, output_path):
         '''
         Input: W2V Matrix, word list above min freq, output path, # of concepts
         Ouput: File containing (word,concept)
@@ -86,7 +86,7 @@ class BOC():
         return word2concept
 
 
-    def transform_tfidf(self, document_matrix):
+    def _transform_tfidf(self, document_matrix):
         idf=[(len(document_matrix))]*len(document_matrix[0])
         for i in range(len(document_matrix[0])):
             idf[i]=math.log(idf[i]/(np.count_nonzero(document_matrix[:,i])+0.0000000000000000001))
@@ -96,7 +96,7 @@ class BOC():
         return np.transpose(np.array(tfidf))
 
 
-    def apply_cfidf(self, word2concept):
+    def _apply_cfidf(self, word2concept):
         boc_matrix=[]
         with open(self.doc_path, "r") as f:
             for line in f:
@@ -115,14 +115,14 @@ class BOC():
         Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously
         '''
         all_param=[]
-        model=self.train_w2v()
-        wlist=self.get_tokens() 
-        wM=self.get_wordvectors(model,wlist)
+        model=self._train_w2v()
+        wlist=self._get_tokens() 
+        wM=self._get_wordvectors(model,wlist)
         w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(self.dim),str(self.context),str(self.min_freq),str(self.num_concept))
         boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(self.dim),str(self.context),str(self.min_freq),str(self.num_concept))
-        word2concept=self.create_concepts(wM,wlist,w2c_output) 
-        boc=self.apply_cfidf(word2concept)
-        boc=self.transform_tfidf(boc)
+        word2concept=self._create_concepts(wM,wlist,w2c_output) 
+        boc=self._apply_cfidf(word2concept)
+        boc=self._transform_tfidf(boc)
         np.savetxt(boc_output, boc, delimiter=",")
         print(".... BOC vectors created in %s" %boc_output)
         all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
@@ -137,12 +137,12 @@ def create_boc_w2v_load(models,doc_path,win,freq,num_concept,model_path):
     for em in models:
         em_name=em.split("/")[-1]
         model=KeyedVectors.load_word2vec_format(em)
-        wlist=get_tokens(doc_path,freq) 
-        wM=get_wordvectors(model,wlist)
+        wlist=_get_tokens(doc_path,freq) 
+        wM=_get_wordvectors(model,wlist)
         for ecp in num_concpt:
             w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
             boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
-            word2concept=create_concepts(wM,wlist,w2c_output,num_concept) 
+            word2concept=_create_concepts(wM,wlist,w2c_output,num_concept) 
             boc=apply_cfidf(doc_path,word2concept,num_concept)
             np.savetxt(boc_output, boc, delimiter=",")
             print(".... BOC vectors created in %s" %boc_output)
