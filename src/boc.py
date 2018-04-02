@@ -1,7 +1,9 @@
 import csv
 import logging
-from collections import defaultdict, namedtuple
+from collections import Counter, defaultdict, namedtuple
 import math
+import sys
+from utils import get_process_memory
 
 import gensim
 import numpy as np
@@ -109,6 +111,17 @@ class BOC():
                 boc_matrix.append(document_vector)
         return np.array(boc_matrix)
 
+
+    def _read_text(self):
+        M_term_doc = defaultdict(lambda: {})
+        with open(self.doc_path, encoding='utf-8') as f:  
+            for d, doc in enumerate(f):
+                tf = Counter(doc.split())
+                for t, freq in tf.items():
+                    M_term_doc[t][d] = freq
+                if d % 1000 == 0: 
+                    sys.stdout.write('\r inserting ... %d docs, mem= %.3f Gb' %(d+1, get_process_memory()))
+        return M_term_doc
 
     def create_boc_w2v_train(self):
         '''
