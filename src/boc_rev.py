@@ -13,63 +13,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 class BOC():
 
-    def __init__(self, doc_path, embedding_d=200, context=8, min_freq=100, num_concept=100):
+    def __init__(self, doc_path, model_path=None, embedding_d=200, context=8, min_freq=100, num_concept=100):
         self.doc_path=doc_path
+        self.model_path=model_path
         self.dim=dim
         self.context=context
         self.min_freq=min_freq
         self.num_concept=num_concept
-
-
-    def _train_w2v(self, save=1):
-        '''
-        Input: Training document file, dimension of W2V, window size, minimum word frequency
-        Output: W2V model; not saved as default
-        Default model of W2V is selected as "Skip-gram" as specified by the paper
-        Other W2V parameters set according to default parameters of gensim
-        '''
-        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-        sent=gensim.models.word2vec.LineSentence(self.doc_path)
-        model=gensim.models.Word2Vec(sent,size=self.embedding_d,window=self.context,min_count=self.min_freq,sg=1)
-        
-        if (save==1):
-            modelnm="w2v_model_d%d_w%d" %(self.embedding_d,self.context)
-            model.wv.save_word2vec_format(modelnm, fvocab=None, binary=False)
-        return model
-
-
-    def _get_tokens(self):
-        '''
-        Input: Training document file
-        output: List of words that occur more frequently than the minimum frequency threshold
-        Used for extracting W2V vectors from the created model
-        '''
-        print(".... Extracting candidate words from %s" %self.doc_path)
-        cnt=0     
-        wordHash=defaultdict(int)
-        wdlist=[]
-        with open(self.doc_path, "r") as f:
-            for line in f:
-                tokens=line.split()
-                for word in tokens:
-                    wordHash[word]+=1
-                    cnt+=1
-                    if cnt%10000==0: print("    %s th doc processed" %str(cnt))
-        for k,v in wordHash.items():
-            if v>=self.min_freq: wdlist.append(k)
-        print(".... Min Freq<%s words removed" %str(self.min_freq))
-        return wdlist
-
-
-    def _get_wordvectors(self, model, wlist):
-        '''
-        Input: W2V model, list of words above minimum frequency
-        Output: W2V Matrix
-        '''
-        w2v=list()
-        for word in wlist:
-            w2v.append(model[word])
-        return np.array(w2v)
 
 
     def _create_concepts(self, w2vM, wlist, output_path):
@@ -112,17 +62,6 @@ class BOC():
         return np.array(boc_matrix)
 
 
-    def _read_text(self):
-        M_term_doc = defaultdict(lambda: {})
-        with open(self.doc_path, encoding='utf-8') as f:  
-            for d, doc in enumerate(f):
-                tf = Counter(doc.split())
-                for t, freq in tf.items():
-                    M_term_doc[t][d] = freq
-                if d % 1000 == 0: 
-                    sys.stdout.write('\r inserting ... %d docs, mem= %.3f Gb' %(d+1, get_process_memory()))
-        return M_term_doc
-
     def create_boc_w2v_train(self):
         '''
         Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously
@@ -140,6 +79,26 @@ class BOC():
         print(".... BOC vectors created in %s" %boc_output)
         all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
         return all_param
+
+
+def train_w2v(doc_path, embedding_d, context, min_frqe, iterations, save=0):
+    '''
+    Input: Training document file, dimension of W2V, window size, minimum word frequency
+    Output: W2V model; not saved as default
+    Default model of W2V is selected as "Skip-gram" as specified by the paper
+    Other W2V parameters set according to default parameters of gensim
+    '''
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+    sent=gensim.models.word2vec.LineSentence(doc_path)
+    model=gensim.models.Word2Vec(sent, size=embedding_d, window=context, min_count=min_freq, sg=1)
+    
+    if (save==1):
+        modelnm="w2v_model_d%d_w%d" %(self.embedding_d,self.context)
+        model.wv.save_word2vec_format(modelnm, fvocab=None, binary=False)
+
+    return model.wv.vectors, model.wv.index2word
+
+
 
 
 def create_boc_w2v_load(models,doc_path,win,freq,num_concept,model_path):
