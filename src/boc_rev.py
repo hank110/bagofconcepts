@@ -29,12 +29,20 @@ class BOC():
         self.iterations=iterations
 
 
+    def _vectorize_doc(self):
+
     def transform(self, w2v_saver=0, boc_saver=0):
         
         if self.model_path not None:
-            model, idx2word = load_w2v(self.doc_path)
+            wv, idx2word = load_w2v(self.doc_path)
         else:
-            model, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
+            wv, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
+
+        skm=SphericalKMeans(n_clusters=self.num_concept)
+        skm.fit(wv)
+
+        zip(indx2word, skm.labels_)
+
 
 
     def _create_concepts(self, w2vM, wlist, output_path):
