@@ -5,7 +5,7 @@ import math
 import sys
 from utils import get_process_memory
 
-import gensim
+from gensim.models import Word2Vec
 import numpy as np
 from spherecluster import SphericalKMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -81,19 +81,28 @@ class BOC():
         return all_param
 
 
-def train_w2v(doc_path, embedding_d, context, min_frqe, iterations, save=0):
+def tokenize(doc_path):
+    with open(doc_path, "r") as f:
+        for doc in f:
+            yield doc.rstrip().split(" ")
+
+
+def train_w2v(doc_path, embedding_d, context, min_freq, iterations, save=0):
     '''
     Input: Training document file, dimension of W2V, window size, minimum word frequency
     Output: W2V model; not saved as default
     Default model of W2V is selected as "Skip-gram" as specified by the paper
     Other W2V parameters set according to default parameters of gensim
     '''
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-    sent=gensim.models.word2vec.LineSentence(doc_path)
-    model=gensim.models.Word2Vec(sent, size=embedding_d, window=context, min_count=min_freq, sg=1)
+    #logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+    tokenized_docs=tokenize(doc_path)
+    model=Word2Vec(size=embedding_d, window=context, min_count=min_freq, sg=1)
+    model.build_vocab(tokenized_docs)
+    model.train(tokenized_docs, total_examples=model.corpus_count, epochs=iterations)
     
     if (save==1):
-        modelnm="w2v_model_d%d_w%d" %(self.embedding_d,self.context)
+        modelnm="w2v_model_d%d_w%d" %(embedding_d, context)
         model.wv.save_word2vec_format(modelnm, fvocab=None, binary=False)
 
     return model.wv.vectors, model.wv.index2word
@@ -101,7 +110,7 @@ def train_w2v(doc_path, embedding_d, context, min_frqe, iterations, save=0):
 
 
 
-def create_boc_w2v_load(models,doc_path,win,freq,num_concept,model_path):
+def load_w2v(models,doc_path,win,freq,num_concept,model_path):
     '''
     Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously    
     '''
