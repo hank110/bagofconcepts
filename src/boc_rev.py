@@ -29,7 +29,22 @@ class BOC():
         self.iterations=iterations
 
 
-    def _vectorize_doc(self):
+    def _create_bow(self, idx2word):
+        rows=[]
+        cols=[]
+        vals=[]
+        word2idx={word:idx for idx, word in enumerate(idx2word)}
+        with open(self.doc_path, "r") as f:
+            for doc in f:
+                tokens=doc.rstrip().split(" ")
+                tokens_count=Counter([word2idx[token] for token in tokens if token in word2idx])
+                for idx, count in tokens_count.items():
+                    rows.append()
+                    cols.append(idx)
+                    vals.append(count)
+
+
+
 
     def transform(self, w2v_saver=0, boc_saver=0):
         
@@ -43,22 +58,7 @@ class BOC():
 
         zip(indx2word, skm.labels_)
 
-
-
-    def _create_concepts(self, w2vM, wlist, output_path):
-        '''
-        Input: W2V Matrix, word list above min freq, output path, # of concepts
-        Ouput: File containing (word,concept)
-        '''
-        skm=SphericalKMeans(n_clusters=self.num_concept)
-        skm.fit(w2vM)
-        word2concept={}
-        with open(output_path, "w") as f:
-            for w,c in zip(wlist,skm.labels_):
-                f.write(w+","+str(c)+"\n")
-                word2concept[w]=c
-        print(".... Words have been assigned to concepts")
-        return word2concept
+        bow=_create_bow(self, idx2word)
 
 
     def _transform_tfidf(self, document_matrix):
