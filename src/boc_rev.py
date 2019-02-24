@@ -5,7 +5,7 @@ import math
 import sys
 from utils import get_process_memory
 
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, KeyedVectors
 import numpy as np
 from spherecluster import SphericalKMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -103,32 +103,13 @@ def train_w2v(doc_path, embedding_d, context, min_freq, iterations, save=0):
     
     if (save==1):
         modelnm="w2v_model_d%d_w%d" %(embedding_d, context)
-        model.wv.save_word2vec_format(modelnm, fvocab=None, binary=False)
+        model.wv.save_word2vec_format(modelnm)
 
     return model.wv.vectors, model.wv.index2word
 
 
-
-
-def load_w2v(models,doc_path,win,freq,num_concept,model_path):
-    '''
-    Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously    
-    '''
-    all_param=[]
-    for em in models:
-        em_name=em.split("/")[-1]
-        model=KeyedVectors.load_word2vec_format(em)
-        wlist=_get_tokens(doc_path,freq) 
-        wM=_get_wordvectors(model,wlist)
-        for ecp in num_concpt:
-            w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
-            boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(em_name),str(win),str(freq),str(ecp))
-            word2concept=_create_concepts(wM,wlist,w2c_output,num_concept) 
-            boc=apply_cfidf(doc_path,word2concept,num_concept)
-            np.savetxt(boc_output, boc, delimiter=",")
-            print(".... BOC vectors created in %s" %boc_output)
-            all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
-    return all_param
+def load_w2v(model_path):
+    return KeyedVectors.load_word2vec_format(model_path)
 
 if __name__ == "__main__":
     main()
