@@ -13,13 +13,28 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 class BOC():
 
-    def __init__(self, doc_path, model_path=None, embedding_d=200, context=8, min_freq=100, num_concept=100):
+    def __init__(self, doc_path=None, model_path=None, embedding_d=200, context=8, min_freq=100, num_concept=100, iterations=5):
+
+        if doc_path not None and model_path not None:
+            raise ValueError("Document and model paths cannot be simultaneously loaded")
+        if doc_path is None and model_path is None:
+            raise ValueError("Must specify either the document path or pre-trained word2vec path")
+
         self.doc_path=doc_path
         self.model_path=model_path
-        self.dim=dim
+        self.embedding_d=embedding_d
         self.context=context
         self.min_freq=min_freq
         self.num_concept=num_concept
+        self.iterations=iterations
+
+
+    def transform(self, w2v_saver=0, boc_saver=0):
+        
+        if self.model_path not None:
+            model, idx2word = load_w2v(self.doc_path)
+        else:
+            model, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
 
 
     def _create_concepts(self, w2vM, wlist, output_path):
@@ -110,6 +125,3 @@ def train_w2v(doc_path, embedding_d, context, min_freq, iterations, save=0):
 
 def load_w2v(model_path):
     return KeyedVectors.load_word2vec_format(model_path)
-
-if __name__ == "__main__":
-    main()
