@@ -5,6 +5,7 @@ import math
 import sys
 
 from scipy.sparse import csr_matrix
+import scipy.sparse
 from sklearn.utils.extmath import safe_sparse_dot
 from gensim.models import Word2Vec, KeyedVectors
 import numpy as np
@@ -69,35 +70,15 @@ class BOC():
         bow=_create_bow(self, idx2word)
         w2c=_create_w2c(self, idx2word, skm.labels_)
         boc=safe_sparse_dot(bow, w2c)
+        # Need to appy cf-idf
 
         if boc_saver==1:
-            zip(idx2word, skm.labels_)
+            scipy.sparse.save_npz('boc.npz', boc)
+            with open('word2concept.txt', 'w') as f:
+                for wc_pair in zip(idx2word, skm.labels_):
+                    f.write(wc_pair+'\n')
         
         return boc, [wc_pair for wc_pair in zip(idx2word, skm.labels_)], idx2word
-
-    
-    def _transform_tfidf(self, document_matrix):
-        idf=[(len(document_matrix))]*len(document_matrix[0])
-        for i in range(len(document_matrix[0])):
-            idf[i]=math.log(idf[i]/(np.count_nonzero(document_matrix[:,i])+0.0000000000000000001))
-        tfidf=[]
-        for j in range(len(idf)):
-            tfidf.append(document_matrix[:,j]*idf[j])
-        return np.transpose(np.array(tfidf))
-
-
-    def _apply_cfidf(self, word2concept):
-        boc_matrix=[]
-        with open(self.doc_path, "r") as f:
-            for line in f:
-                document_vector=[0]*self.num_concept
-                for word in line.split():
-                    try:
-                        document_vector[word2concept[word]]+=1
-                    except KeyError:
-                        continue
-                boc_matrix.append(document_vector)
-        return np.array(boc_matrix)
 
 
 def tokenize(doc_path):
