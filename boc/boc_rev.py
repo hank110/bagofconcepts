@@ -3,8 +3,8 @@ import logging
 from collections import Counter, defaultdict, namedtuple
 import math
 import sys
-from utils import get_process_memory
 
+from scipy.sparse import csr_matrix
 from gensim.models import Word2Vec, KeyedVectors
 import numpy as np
 from spherecluster import SphericalKMeans
@@ -35,15 +35,14 @@ class BOC():
         vals=[]
         word2idx={word:idx for idx, word in enumerate(idx2word)}
         with open(self.doc_path, "r") as f:
-            for doc in f:
+            for i, doc in enumerate(f):
                 tokens=doc.rstrip().split(" ")
                 tokens_count=Counter([word2idx[token] for token in tokens if token in word2idx])
                 for idx, count in tokens_count.items():
-                    rows.append()
+                    rows.append(i)
                     cols.append(idx)
                     vals.append(count)
-
-
+        return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
 
     def transform(self, w2v_saver=0, boc_saver=0):
@@ -55,10 +54,12 @@ class BOC():
 
         skm=SphericalKMeans(n_clusters=self.num_concept)
         skm.fit(wv)
-
-        zip(indx2word, skm.labels_)
-
         bow=_create_bow(self, idx2word)
+        w2c=
+
+        if boc_saver==1:
+            zip(indx2word, skm.labels_)
+
 
 
     def _transform_tfidf(self, document_matrix):
@@ -83,25 +84,6 @@ class BOC():
                         continue
                 boc_matrix.append(document_vector)
         return np.array(boc_matrix)
-
-
-    def create_boc_w2v_train(self):
-        '''
-        Creates (word, concept) result for given dimension, window, min freq threshold and num of concepts    Trains new W2v models simultaneously
-        '''
-        all_param=[]
-        model=self._train_w2v()
-        wlist=self._get_tokens() 
-        wM=self._get_wordvectors(model,wlist)
-        w2c_output="w2c_d%s_w%s_mf%s_c%s.csv" %(str(self.dim),str(self.context),str(self.min_freq),str(self.num_concept))
-        boc_output="boc_d%s_w%s_mf%s_c%s.csv" %(str(self.dim),str(self.context),str(self.min_freq),str(self.num_concept))
-        word2concept=self._create_concepts(wM,wlist,w2c_output) 
-        boc=self._apply_cfidf(word2concept)
-        boc=self._transform_tfidf(boc)
-        np.savetxt(boc_output, boc, delimiter=",")
-        print(".... BOC vectors created in %s" %boc_output)
-        all_param.append(namedtuple('parameters','document_path dimension window_size min_freq num_concept'))
-        return all_param
 
 
 def tokenize(doc_path):
