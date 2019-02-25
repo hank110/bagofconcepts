@@ -5,6 +5,7 @@ import math
 import sys
 
 from scipy.sparse import csr_matrix
+from sklearn.utils.extmath import safe_sparse_dot
 from gensim.models import Word2Vec, KeyedVectors
 import numpy as np
 from spherecluster import SphericalKMeans
@@ -45,6 +46,17 @@ class BOC():
         return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
 
+    def _create_w2c(self, idx2word, sk_labels):
+        if len(idx2word) != len(sk_labels):
+            raise IndexError("Dimensions between words and labels mismatched")
+
+        rows=[i for i, idx2word in enumerate(idx2word)]
+        cols=[label for label in sk_labels]
+        vals=[1 for i in idx2word]
+
+        return csr_matrix((vals, (rows, cols), shape=(len(idx2word), len(cols))))
+        
+    
     def transform(self, w2v_saver=0, boc_saver=0):
         
         if self.model_path not None:
@@ -55,13 +67,15 @@ class BOC():
         skm=SphericalKMeans(n_clusters=self.num_concept)
         skm.fit(wv)
         bow=_create_bow(self, idx2word)
-        w2c=
+        w2c=_create_w2c(self, idx2word, skm.labels_)
+        boc=safe_sparse_dot(bow, w2c)
 
         if boc_saver==1:
-            zip(indx2word, skm.labels_)
+            zip(idx2word, skm.labels_)
+        
+        return boc, [wc_pair for wc_pair in zip(idx2word, skm.labels_)], idx2word
 
-
-
+    
     def _transform_tfidf(self, document_matrix):
         idf=[(len(document_matrix))]*len(document_matrix[0])
         for i in range(len(document_matrix[0])):
