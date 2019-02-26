@@ -14,7 +14,7 @@ class BOC():
 
     def __init__(self, doc_path=None, model_path=None, embedding_d=200, context=8, min_freq=100, num_concept=100, iterations=5):
 
-        if doc_path not None and model_path not None:
+        if doc_path is not None and model_path is not None:
             raise ValueError("Document and model paths cannot be simultaneously loaded")
         if doc_path is None and model_path is None:
             raise ValueError("Must specify either the document path or pre-trained word2vec path")
@@ -52,7 +52,7 @@ class BOC():
         cols=[label for label in sk_labels]
         vals=[1 for i in idx2word]
 
-        return csr_matrix((vals, (rows, cols), shape=(len(idx2word), len(cols))))
+        return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), len(cols)))
 
 
     def _apply_cfidf(self, csr_matrix):
@@ -64,7 +64,7 @@ class BOC():
     
     def fit(self, w2v_saver=0, boc_saver=0):
         
-        if self.model_path not None:
+        if self.model_path is not None:
             wv, idx2word = load_w2v(self.doc_path)
         else:
             wv, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
