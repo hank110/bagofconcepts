@@ -40,7 +40,7 @@ class BOC():
                 for idx, count in tokens_count.items():
                     rows.append(i)
                     cols.append(idx)
-                    vals.append(count)
+                    vals.append(float(count))
         return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
 
@@ -49,15 +49,16 @@ class BOC():
             raise IndexError("Dimensions between words and labels mismatched")
 
         rows=[i for i, idx2word in enumerate(idx2word)]
-        cols=[label for label in sk_labels]
-        vals=[1 for i in idx2word]
+        cols=[j for j in sk_labels]
+        vals=[1.0 for i in idx2word]
 
-        return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), len(cols)))
+        return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), self.num_concept))
 
 
     def _apply_cfidf(self, csr_matrix):
         num_doc=float(csr_matrix.shape[0])
         for i in range(csr_matrix.shape[1]):
+            if csr_matrix[:,i].nnz==0: continue
             csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
         return csr_matrix
         
@@ -71,15 +72,15 @@ class BOC():
 
         skm=SphericalKMeans(n_clusters=self.num_concept)
         skm.fit(wv)
-        bow=_create_bow(self, idx2word)
-        w2c=_create_w2c(self, idx2word, skm.labels_)
-        boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
-
+        bow=self._create_bow(idx2word)
+        w2c=self._create_w2c(idx2word, skm.labels_)
+        boc=self._apply_cfidf(safe_sparse_dot(bow, w2c))
+        
         if boc_saver==1:
             scipy.sparse.save_npz('boc.npz', boc)
             with open('word2concept.txt', 'w') as f:
                 for wc_pair in zip(idx2word, skm.labels_):
-                    f.write(wc_pair+'\n')
+                    f.write(str(wc_pair)+'\n')
         
         return boc, [wc_pair for wc_pair in zip(idx2word, skm.labels_)], idx2word
 
