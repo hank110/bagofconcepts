@@ -1,4 +1,3 @@
-import csv
 import logging
 from collections import Counter, defaultdict, namedtuple
 import math
@@ -8,9 +7,7 @@ from scipy.sparse import csr_matrix
 import scipy.sparse
 from sklearn.utils.extmath import safe_sparse_dot
 from gensim.models import Word2Vec, KeyedVectors
-import numpy as np
 from spherecluster import SphericalKMeans
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class BOC():
@@ -56,9 +53,16 @@ class BOC():
         vals=[1 for i in idx2word]
 
         return csr_matrix((vals, (rows, cols), shape=(len(idx2word), len(cols))))
+
+
+    def _apply_cfidf(self, csr_matrix):
+        num_doc=float(csr_matrix.shape[0])
+        for i in range(csr_matrix.shape[1]):
+            csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
+        return csr_matrix
         
     
-    def transform(self, w2v_saver=0, boc_saver=0):
+    def fit(self, w2v_saver=0, boc_saver=0):
         
         if self.model_path not None:
             wv, idx2word = load_w2v(self.doc_path)
@@ -69,8 +73,7 @@ class BOC():
         skm.fit(wv)
         bow=_create_bow(self, idx2word)
         w2c=_create_w2c(self, idx2word, skm.labels_)
-        boc=safe_sparse_dot(bow, w2c)
-        # Need to appy cf-idf
+        boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
 
         if boc_saver==1:
             scipy.sparse.save_npz('boc.npz', boc)
