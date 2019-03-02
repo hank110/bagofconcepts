@@ -4,12 +4,12 @@ setup(
   packages = ['boc'],   # Chose the same as "name"
   version = '0.1',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-  description = 'TYPE YOUR DESCRIPTION HERE',   # Give a short description about your library
+  description = 'This is python implementation of Bag-of-Concepts, as proposed by the paper "Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho). For a given text data, it trains word2vec vectors for each of the words and clusters semantically similar words into a common "concept". Subsequently, each document is represented by the counts of these concepts. Weighting scheme (Concept Frequency - Inverse Frequency) is applied. Please refer to sample code for detailed usage.',   # Give a short description about your library
   author = 'Han Kyul Kim',                   # Type in your name
   author_email = 'hank1111@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/hank110/bag-of-concepts',   # Provide either the link to your github or to your website
   download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
-  keywords = ['bag of concepts', 'word2vec clustering', 'KEYWORDS'],   # Keywords that define your package best
+  keywords = ['bag of concepts', 'word2vec clustering', 'text mining', 'NLP', 'machine learning'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'scipy',
           'scikit-learn',
