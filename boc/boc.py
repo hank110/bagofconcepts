@@ -12,7 +12,10 @@ from spherecluster import SphericalKMeans
 
 class BOC():
 
-    def __init__(self, doc_path=None, model_path=None, embedding_d=200, context=8, min_freq=100, num_concept=100, iterations=5):
+    def __init__(self, doc_path=None, model_path=None, embedding_d=200, 
+        context=8, min_freq=100, num_concept=100, iterations=5):
+    	# Unified model & doc path
+    	# Different embedding methods --> numpy ndarray
 
         if doc_path is not None and model_path is not None:
             raise ValueError("Document and model paths cannot be simultaneously loaded")
@@ -29,6 +32,7 @@ class BOC():
 
 
     def _create_bow(self, idx2word):
+    	## Separate py file or out of this class
         rows=[]
         cols=[]
         vals=[]
@@ -45,6 +49,7 @@ class BOC():
 
 
     def _create_w2c(self, idx2word, sk_labels):
+    	# rename sk_labels parameter
         if len(idx2word) != len(sk_labels):
             raise IndexError("Dimensions between words and labels mismatched")
 
@@ -57,8 +62,11 @@ class BOC():
 
     def _apply_cfidf(self, csr_matrix):
         num_doc=float(csr_matrix.shape[0])
+        # instead of iterating, use cols numpy counter from csr matrix to return the concept count
         for i in range(csr_matrix.shape[1]):
-            if csr_matrix[:,i].nnz==0: continue
+            if csr_matrix[:,i].nnz==0:
+                continue
+            # csr_matrix[:,i] = 0
             csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
         return csr_matrix
         
@@ -71,11 +79,13 @@ class BOC():
             wv, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
 
         skm=SphericalKMeans(n_clusters=self.num_concept)
+        # Separate method for imported method
         skm.fit(wv)
         bow=self._create_bow(idx2word)
         w2c=self._create_w2c(idx2word, skm.labels_)
         boc=self._apply_cfidf(safe_sparse_dot(bow, w2c))
-        
+        # save icf matrix for transform (inference purpose)
+        # separate saver file
         if boc_saver==1:
             scipy.sparse.save_npz('boc.npz', boc)
             with open('word2concept.txt', 'w') as f:
@@ -106,7 +116,8 @@ def train_w2v(doc_path, embedding_d, context, min_freq, iterations, save=0):
     model.train(tokenized_docs, total_examples=model.corpus_count, epochs=iterations)
     
     if (save==1):
-        modelnm="w2v_model_d%d_w%d" %(embedding_d, context)
+    	# Note for abbreviation
+        modelnm="w2v_model_d%d_w%d" %(embedding_d, context) #embedding_dim
         model.wv.save_word2vec_format(modelnm)
 
     return model.wv.vectors, model.wv.index2word
