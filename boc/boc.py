@@ -1,5 +1,5 @@
 import logging
-from collections import Counter, defaultdict, namedtuple
+from collections import Counter, defaultdict
 import math
 import sys
 
@@ -12,7 +12,7 @@ from spherecluster import SphericalKMeans
 
 class BOC():
 
-    def __init__(self, doc_path=None, model_path=None, embedding_d=200, 
+    def __init__(self, doc_path=None, model_path=None, embedding_dim=200, 
         context=8, min_freq=100, num_concept=100, iterations=5):
     	# Unified model & doc path
     	# Different embedding methods --> numpy ndarray
@@ -24,75 +24,80 @@ class BOC():
 
         self.doc_path=doc_path
         self.model_path=model_path
-        self.embedding_d=embedding_d
+        self.embedding_dim=embedding_dim
         self.context=context
         self.min_freq=min_freq
         self.num_concept=num_concept
         self.iterations=iterations
 
-
-    def _create_bow(self, idx2word):
-    	## Separate py file or out of this class
-        rows=[]
-        cols=[]
-        vals=[]
-        word2idx={word:idx for idx, word in enumerate(idx2word)}
-        with open(self.doc_path, "r") as f:
-            for i, doc in enumerate(f):
-                tokens=doc.rstrip().split(" ")
-                tokens_count=Counter([word2idx[token] for token in tokens if token in word2idx])
-                for idx, count in tokens_count.items():
-                    rows.append(i)
-                    cols.append(idx)
-                    vals.append(float(count))
-        return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
-
-
-    def _create_w2c(self, idx2word, sk_labels):
-    	# rename sk_labels parameter
-        if len(idx2word) != len(sk_labels):
-            raise IndexError("Dimensions between words and labels mismatched")
-
-        rows=[i for i, idx2word in enumerate(idx2word)]
-        cols=[j for j in sk_labels]
-        vals=[1.0 for i in idx2word]
-
-        return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), self.num_concept))
-
-
-    def _apply_cfidf(self, csr_matrix):
-        num_doc=float(csr_matrix.shape[0])
-        # instead of iterating, use cols numpy counter from csr matrix to return the concept count
-        for i in range(csr_matrix.shape[1]):
-            if csr_matrix[:,i].nnz==0:
-                continue
-            # csr_matrix[:,i] = 0
-            csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
-        return csr_matrix
-        
     
-    def fit(self, w2v_saver=0, boc_saver=0):
+    def fit(self, w2v_saver=0, output_path=""):
         
         if self.model_path is not None:
             wv, idx2word = load_w2v(self.doc_path)
         else:
-            wv, idx2word = train_w2v(self.doc_path, self.embedding_d, self.context, self.min_freq, self.iterations, w2v_saver)
+            wv, idx2word = train_w2v(self.doc_path, self.embedding_dim, 
+                self.context, self.min_freq, self.iterations, w2v_saver)
 
-        skm=SphericalKMeans(n_clusters=self.num_concept)
-        # Separate method for imported method
-        skm.fit(wv)
-        bow=self._create_bow(idx2word)
-        w2c=self._create_w2c(idx2word, skm.labels_)
-        boc=self._apply_cfidf(safe_sparse_dot(bow, w2c))
+        wv_cluster_id = _cluster_wv(wv, self.num_concept)
+        bow=_create_bow(idx2word)
+        w2c=_create_w2c(idx2word, wv_cluster_id)
+        boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
         # save icf matrix for transform (inference purpose)
-        # separate saver file
-        if boc_saver==1:
-            scipy.sparse.save_npz('boc.npz', boc)
-            with open('word2concept.txt', 'w') as f:
-                for wc_pair in zip(idx2word, skm.labels_):
-                    f.write(str(wc_pair)+'\n')
-        
-        return boc, [wc_pair for wc_pair in zip(idx2word, skm.labels_)], idx2word
+        if output_path:
+           save_boc(output_path, idx2word, wv_cluster_id)
+            
+        return boc, [wc_pair for wc_pair in zip(idx2word, wv_cluster_id)], idx2word
+
+
+def save_boc(filepath, idx2word, wv_cluster_id):
+    scipy.sparse.save_npz(filepath+'.npz', boc)
+    with open(filepath+'.txt', 'w') as f:
+        for wc_pair in zip(idx2word, wv_cluster_id):
+            f.write(str(wc_pair)+'\n')
+
+def _cluster_wv(wv, num_concept):
+    skm=SphericalKMeans(n_clusters=self.num_concept)
+    skm.fit(wv)
+    return skm.labels_
+
+
+def _create_bow(idx2word):
+    rows=[]
+    cols=[]
+    vals=[]
+    word2idx={word:idx for idx, word in enumerate(idx2word)}
+    with open(self.doc_path, "r") as f:
+        for i, doc in enumerate(f):
+            tokens=doc.rstrip().split(" ")
+            tokens_count=Counter([word2idx[token] for token in tokens if token in word2idx])
+            for idx, count in tokens_count.items():
+                rows.append(i)
+                cols.append(idx)
+                vals.append(float(count))
+    return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
+
+
+def _create_w2c(self, idx2word, cluster_label):
+    if len(idx2word) != len(cluster_label):
+        raise IndexError("Dimensions between words and labels mismatched")
+
+    rows=[i for i, idx2word in enumerate(idx2word)]
+    cols=[j for j in cluster_label]
+    vals=[1.0 for i in idx2word]
+
+    return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), self.num_concept))
+
+
+def _apply_cfidf(self, csr_matrix):
+    num_doc=float(csr_matrix.shape[0])
+    # instead of iterating, use cols numpy counter from csr matrix to return the concept count
+    for i in range(csr_matrix.shape[1]):
+        if csr_matrix[:,i].nnz==0:
+            continue
+        # csr_matrix[:,i] = 0
+        csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
+    return csr_matrix
 
 
 def tokenize(doc_path):
@@ -101,24 +106,15 @@ def tokenize(doc_path):
             yield doc.rstrip().split(" ")
 
 
-def train_w2v(doc_path, embedding_d, context, min_freq, iterations, save=0):
-    '''
-    Input: Training document file, dimension of W2V, window size, minimum word frequency
-    Output: W2V model; not saved as default
-    Default model of W2V is selected as "Skip-gram" as specified by the paper
-    Other W2V parameters set according to default parameters of gensim
-    '''
-    #logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
+def train_w2v(doc_path, embedding_dim, context, min_freq, iterations, save=0):
     tokenized_docs=tokenize(doc_path)
-    model=Word2Vec(size=embedding_d, window=context, min_count=min_freq, sg=1)
+    model=Word2Vec(size=embedding_dim, window=context, min_count=min_freq, sg=1)
     model.build_vocab(tokenized_docs)
     model.train(tokenized_docs, total_examples=model.corpus_count, epochs=iterations)
     
     if (save==1):
-    	# Note for abbreviation
-        modelnm="w2v_model_d%d_w%d" %(embedding_d, context) #embedding_dim
-        model.wv.save_word2vec_format(modelnm)
+        model_name="w2v_model_d%d_w%d" %(embedding_dim, context) #embedding_dimim
+        model.wv.save_word2vec_format(model_name)
 
     return model.wv.vectors, model.wv.index2word
 
