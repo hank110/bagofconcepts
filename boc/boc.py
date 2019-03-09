@@ -12,18 +12,20 @@ from spherecluster import SphericalKMeans
 
 class BOC():
 
-    def __init__(self, doc_path=None, model_path=None, embedding_dim=200, 
+    def __init__(self, input_path=None, embedding_dim=200, 
         context=8, min_freq=100, num_concept=100, iterations=5):
     	# Unified model & doc path
     	# Different embedding methods --> numpy ndarray
-
-        if doc_path is not None and model_path is not None:
-            raise ValueError("Document and model paths cannot be simultaneously loaded")
-        if doc_path is None and model_path is None:
+        if input_path is None:
             raise ValueError("Must specify either the document path or pre-trained word2vec path")
+        
+        if input_path[-3:]=="txt":
+            self.doc_path=input_path
+            self.mode_path=None
+        else:
+            self.doc_path=None
+            self.model_path=input_path
 
-        self.doc_path=doc_path
-        self.model_path=model_path
         self.embedding_dim=embedding_dim
         self.context=context
         self.min_freq=min_freq
@@ -45,12 +47,12 @@ class BOC():
         boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
         
         if output_path:
-           save_boc(output_path, idx2word, wv_cluster_id)
+           _save_boc(output_path, idx2word, wv_cluster_id)
             
         return boc, [wc_pair for wc_pair in zip(idx2word, wv_cluster_id)], idx2word
 
 
-def save_boc(filepath, idx2word, wv_cluster_id):
+def _save_boc(filepath, idx2word, wv_cluster_id):
     scipy.sparse.save_npz(filepath+'.npz', boc)
     with open(filepath+'.txt', 'w') as f:
         for wc_pair in zip(idx2word, wv_cluster_id):
