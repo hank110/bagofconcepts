@@ -34,12 +34,12 @@ class BOC():
     def fit(self, w2v_saver=0, output_path=""):
         
         if self.model_path is not None:
-            wv, idx2word = load_w2v(self.doc_path)
+            wv, idx2word=load_w2v(self.doc_path)
         else:
-            wv, idx2word = train_w2v(self.doc_path, self.embedding_dim, 
+            wv, idx2word=train_w2v(self.doc_path, self.embedding_dim, 
                 self.context, self.min_freq, self.iterations, w2v_saver)
 
-        wv_cluster_id = _cluster_wv(wv, self.num_concept)
+        wv_cluster_id=_cluster_wv(wv, self.num_concept)
         bow=_create_bow(idx2word)
         w2c=_create_w2c(idx2word, wv_cluster_id)
         boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
@@ -80,7 +80,7 @@ def _create_bow(idx2word):
 
 
 def _create_w2c(idx2word, cluster_label):
-    if len(idx2word) != len(cluster_label):
+    if len(idx2word)!=len(cluster_label):
         raise IndexError("Dimensions between words and labels mismatched")
 
     rows=[i for i, idx2word in enumerate(idx2word)]
@@ -94,7 +94,7 @@ def _apply_cfidf(csr_matrix):
     num_docs, num_concepts=csr_matrix.shape
     _, nz_concept_idx=csr_matrix.nonzero()
     cf=np.bincount(nz_concept, minlength=num_concepts)
-    icf[np.isinf(icf)] = 0
+    icf[np.isinf(icf)]=0
     icf=math.log10(num_docs / cf)
     return safe_sparse_dot(csr_matrix, scipy.sparse.diags(icf))
 
