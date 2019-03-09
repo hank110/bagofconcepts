@@ -43,7 +43,7 @@ class BOC():
         bow=_create_bow(idx2word)
         w2c=_create_w2c(idx2word, wv_cluster_id)
         boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
-        # save icf matrix for transform (inference purpose)
+        
         if output_path:
            save_boc(output_path, idx2word, wv_cluster_id)
             
@@ -55,6 +55,7 @@ def save_boc(filepath, idx2word, wv_cluster_id):
     with open(filepath+'.txt', 'w') as f:
         for wc_pair in zip(idx2word, wv_cluster_id):
             f.write(str(wc_pair)+'\n')
+
 
 def _cluster_wv(wv, num_concept):
     skm=SphericalKMeans(n_clusters=self.num_concept)
@@ -78,7 +79,7 @@ def _create_bow(idx2word):
     return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
 
-def _create_w2c(self, idx2word, cluster_label):
+def _create_w2c(idx2word, cluster_label):
     if len(idx2word) != len(cluster_label):
         raise IndexError("Dimensions between words and labels mismatched")
 
@@ -89,15 +90,13 @@ def _create_w2c(self, idx2word, cluster_label):
     return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), self.num_concept))
 
 
-def _apply_cfidf(self, csr_matrix):
-    num_doc=float(csr_matrix.shape[0])
-    # instead of iterating, use cols numpy counter from csr matrix to return the concept count
-    for i in range(csr_matrix.shape[1]):
-        if csr_matrix[:,i].nnz==0:
-            continue
-        # csr_matrix[:,i] = 0
-        csr_matrix[:,i]*=math.log10(num_doc/csr_matrix[:,i].nnz)
-    return csr_matrix
+def _apply_cfidf(csr_matrix):
+    num_docs, num_concepts=csr_matrix.shape
+    _, nz_concept_idx=csr_matrix.nonzero()
+    cf=np.bincount(nz_concept, minlength=num_concepts)
+    icf[np.isinf(icf)] = 0
+    icf=math.log10(num_docs / cf)
+    return safe_sparse_dot(csr_matrix, scipy.sparse.diags(icf))
 
 
 def tokenize(doc_path):
@@ -113,7 +112,7 @@ def train_w2v(doc_path, embedding_dim, context, min_freq, iterations, save=0):
     model.train(tokenized_docs, total_examples=model.corpus_count, epochs=iterations)
     
     if (save==1):
-        model_name="w2v_model_d%d_w%d" %(embedding_dim, context) #embedding_dimim
+        model_name="w2v_model_d%d_w%d" %(embedding_dim, context) 
         model.wv.save_word2vec_format(model_name)
 
     return model.wv.vectors, model.wv.index2word
