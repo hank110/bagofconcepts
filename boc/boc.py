@@ -3,6 +3,7 @@ from collections import Counter, defaultdict
 import math
 import sys
 
+import numpy as np
 from scipy.sparse import csr_matrix
 import scipy.sparse
 from sklearn.utils.extmath import safe_sparse_dot
@@ -10,7 +11,7 @@ from gensim.models import Word2Vec, KeyedVectors
 from spherecluster import SphericalKMeans
 
 
-class BOC():
+class BOCModel():
 
     def __init__(self, input_path=None, embedding_dim=200, 
         context=8, min_freq=100, num_concept=100, iterations=5):
@@ -21,7 +22,7 @@ class BOC():
         
         if input_path[-3:]=="txt":
             self.doc_path=input_path
-            self.mode_path=None
+            self.model_path=None
         else:
             self.doc_path=None
             self.model_path=input_path
@@ -42,8 +43,8 @@ class BOC():
                 self.context, self.min_freq, self.iterations, w2v_saver)
 
         wv_cluster_id=_cluster_wv(wv, self.num_concept)
-        bow=_create_bow(idx2word)
-        w2c=_create_w2c(idx2word, wv_cluster_id)
+        bow=_create_bow(idx2word, self.doc_path)
+        w2c=_create_w2c(idx2word, wv_cluster_id, self.num_concept)
         boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
         
         if output_path:
@@ -60,17 +61,17 @@ def _save_boc(filepath, idx2word, wv_cluster_id):
 
 
 def _cluster_wv(wv, num_concept):
-    skm=SphericalKMeans(n_clusters=self.num_concept)
+    skm=SphericalKMeans(n_clusters=num_concept)
     skm.fit(wv)
     return skm.labels_
 
 
-def _create_bow(idx2word):
+def _create_bow(idx2word, doc_path):
     rows=[]
     cols=[]
     vals=[]
     word2idx={word:idx for idx, word in enumerate(idx2word)}
-    with open(self.doc_path, "r") as f:
+    with open(doc_path, "r") as f:
         for i, doc in enumerate(f):
             tokens=doc.rstrip().split(" ")
             tokens_count=Counter([word2idx[token] for token in tokens if token in word2idx])
@@ -81,7 +82,7 @@ def _create_bow(idx2word):
     return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
 
-def _create_w2c(idx2word, cluster_label):
+def _create_w2c(idx2word, cluster_label, num_concept):
     if len(idx2word)!=len(cluster_label):
         raise IndexError("Dimensions between words and labels mismatched")
 
@@ -89,15 +90,15 @@ def _create_w2c(idx2word, cluster_label):
     cols=[j for j in cluster_label]
     vals=[1.0 for i in idx2word]
 
-    return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), self.num_concept))
+    return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), num_concept))
 
 
 def _apply_cfidf(csr_matrix):
     num_docs, num_concepts=csr_matrix.shape
     _, nz_concept_idx=csr_matrix.nonzero()
-    cf=np.bincount(nz_concept, minlength=num_concepts)
-    icf[np.isinf(icf)]=0
+    cf=np.bincount(nz_concept_idx, minlength=num_concepts)
     icf=math.log10(num_docs / cf)
+    icf[np.isinf(icf)]=0
     return safe_sparse_dot(csr_matrix, scipy.sparse.diags(icf))
 
 

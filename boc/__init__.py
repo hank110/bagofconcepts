@@ -1,1 +1,1 @@
-from .boc import BOC 
+from .boc import BOCModel 
