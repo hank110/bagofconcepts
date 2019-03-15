@@ -1,4 +1,5 @@
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup
 setup(
   name = 'boc',         # How you named your package folder (MyLib)
   packages = ['boc'],   # Chose the same as "name"
@@ -14,7 +15,7 @@ setup(
           'scipy',
           'scikit-learn',
           'gensim',
-          'spherecluster'
+          'spherecluster',
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
