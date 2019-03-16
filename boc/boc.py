@@ -43,14 +43,14 @@ class BOCModel():
         boc=_apply_cfidf(safe_sparse_dot(bow, w2c))
         
         if output_path:
-           _save_boc(output_path, idx2word, wv_cluster_id)
+           _save_boc(output_path, boc, idx2word, wv_cluster_id)
             
         return boc, [wc_pair for wc_pair in zip(idx2word, wv_cluster_id)], idx2word
 
 
-def _save_boc(filepath, idx2word, wv_cluster_id):
-    scipy.sparse.save_npz(filepath+'.npz', boc)
-    with open(filepath+'.txt', 'w') as f:
+def _save_boc(filepath, boc, idx2word, wv_cluster_id):
+    scipy.sparse.save_npz(filepath+'/boc_matrix.npz', boc)
+    with open(filepath+'/word2context.txt', 'w') as f:
         for wc_pair in zip(idx2word, wv_cluster_id):
             f.write(str(wc_pair)+'\n')
 
