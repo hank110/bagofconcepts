@@ -13,20 +13,15 @@ from spherecluster import SphericalKMeans
 
 class BOCModel():
 
-    def __init__(self, input_path=None, embedding_dim=200, 
+    def __init__(self, doc_path=None, model_path=None, embedding_dim=200, 
         context=8, min_freq=100, num_concept=100, iterations=5):
-    	# Unified model & doc path
+    	# Unified model path required for incorporating numpy ndarray
     	# Different embedding methods --> numpy ndarray
-        if input_path is None:
+        if doc_path is None and model_path is None:
             raise ValueError("Must specify either the document path or pre-trained word2vec path")
         
-        if input_path[-3:]=="txt":
-            self.doc_path=input_path
-            self.model_path=None
-        else:
-            self.doc_path=None
-            self.model_path=input_path
-
+        self.doc_path=doc_path
+        self.model_path=model_path
         self.embedding_dim=embedding_dim
         self.context=context
         self.min_freq=min_freq
@@ -97,7 +92,7 @@ def _apply_cfidf(csr_matrix):
     num_docs, num_concepts=csr_matrix.shape
     _, nz_concept_idx=csr_matrix.nonzero()
     cf=np.bincount(nz_concept_idx, minlength=num_concepts)
-    icf=math.log10(num_docs / cf)
+    icf=np.log(num_docs / cf)
     icf[np.isinf(icf)]=0
     return safe_sparse_dot(csr_matrix, scipy.sparse.diags(icf))
 
