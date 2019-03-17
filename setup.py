@@ -8,9 +8,9 @@ setup(
   description = 'This is python implementation of Bag-of-Concepts, as proposed by the paper "Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho). For a given text data, it trains word2vec vectors for each of the words and clusters semantically similar words into a common "concept". Subsequently, each document is represented by the counts of these concepts. Weighting scheme (Concept Frequency - Inverse Frequency) is applied. Please refer to sample code for detailed usage.',  
   author = 'Hank Kim',                   
   author_email = 'hank1111@gmail.com',
-  url = 'https://github.com/hank110/bag-of-concepts',
-  download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',
-  keywords = ['bag of concepts', 'word2vec clustering', 'text mining', 'NLP', 'machine learning'],
+  url = 'https://github.com/hank110/boc',
+  download_url = 'https://github.com/hank110/boc/archive/v0.0.1.tar.gz',
+  keywords = ['bag of concepts', 'boc', 'word2vec clustering', 'text mining', 'NLP', 'machine learning'],
   install_requires=[       
           'numpy',
           'scipy',
