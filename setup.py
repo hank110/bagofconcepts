@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-  name = 'boc',         
-  packages = ['boc'],   
+  name = 'bagofconcepts',         
+  packages = ['bagofconcepts'],   
   version = '0.0.1',      
   license='MIT',        
   description = 'This is python implementation of Bag-of-Concepts, as proposed by the paper "Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation"',  
