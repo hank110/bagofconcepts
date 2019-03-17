@@ -9,12 +9,12 @@ Subsequently, each document is represented by the counts of these concepts with 
 
 ## Installation
 ```
-$ pip install boc
+$ pip install bagofconcepts
 ```
 
 ## Basic Usage
 ```
-import boc
+import bagofconcepts as boc
 
 
 # Each line of corpus must be equivalent to each document of the corpus
