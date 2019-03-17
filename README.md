@@ -1,28 +1,25 @@
 # Bag-of-Concepts
 
-This is python implementation of Bag-of-Concepts, as proposed by the paper ["Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho)](https://www.sciencedirect.com/science/article/pii/S0925231217308962)
+This is python implementation of Bag-of-Concepts, as proposed in the paper ["Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho)](https://www.sciencedirect.com/science/article/pii/S0925231217308962)
 
 For a given text data, it trains word2vec vectors for each of the words and clusters semantically similar words into a common "concept".
 
-Subsequently, each document is represented by the counts of these concepts. 
+Subsequently, each document is represented by the counts of these concepts with concept frequency - inverse document frequency weighting scheme.
 
-Weighting scheme (Concept Frequency - Inverse Frequency) is applied.
 
-## Requirements:
-
-- Python 3.x
-- gensim >= 2.1.0
-- numpy >= 1.11.0
-- spherecluster >= 0.1.2
-- sklearn >= 0.17.1
+## Installation
+```
+$ pip install boc
+```
 
 ## Basic Usage
 ```
 import boc
 
-boc_object = boc.BOC(document_path, w2v dimension, context size, minimum frequency, number of concepts)
-boc_object.create_boc_w2v_train()
+
+# Each line of corpus must be equivalent to each document of the corpus
+boc_model=boc.BOCModel(doc_path="input corpus path")
+
+# output can be saved with save_path parameter
+boc_matrix,word2concept_list,idx2word_converter=a.fit()
 ```
-
-
-Please refer to **tutorial.ipynb** for detailed explaination of this package's usage
