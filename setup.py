@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name = 'boc',         
   packages = ['boc'],   
-  version = '0.1',      
+  version = '0.0.1',      
   license='MIT',        
   description = 'This is python implementation of Bag-of-Concepts, as proposed by the paper "Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho). For a given text data, it trains word2vec vectors for each of the words and clusters semantically similar words into a common "concept". Subsequently, each document is represented by the counts of these concepts. Weighting scheme (Concept Frequency - Inverse Frequency) is applied. Please refer to sample code for detailed usage.',  
   author = 'Hank Kim',                   

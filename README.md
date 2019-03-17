@@ -1,4 +1,4 @@
-# Bag-of-Concepts
+# BOC (Bag-of-Concepts)
 
 This is python implementation of Bag-of-Concepts, as proposed in the paper ["Bag-of-Concepts: Comprehending Document Representation through Clustering Words in Distributed Representation" (Han Kyul Kim, Hyunjoong Kim, Sunzoon Cho)](https://www.sciencedirect.com/science/article/pii/S0925231217308962)
 
