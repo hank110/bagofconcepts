@@ -27,7 +27,6 @@ class BOCModel():
         self.min_freq=min_freq
         self.num_concept=num_concept
         self.iterations=iterations
-
     
     def fit(self, save_path=""):
         
@@ -47,19 +46,16 @@ class BOCModel():
             
         return boc, [wc_pair for wc_pair in zip(idx2word, wv_cluster_id)], idx2word
 
-
 def _save_boc(filepath, boc, idx2word, wv_cluster_id):
     scipy.sparse.save_npz(filepath+'/boc_matrix.npz', boc)
     with open(filepath+'/word2context.txt', 'w') as f:
         for wc_pair in zip(idx2word, wv_cluster_id):
             f.write(str(wc_pair)+'\n')
 
-
 def _cluster_wv(wv, num_concept):
     skm=SphericalKMeans(n_clusters=num_concept)
     skm.fit(wv)
     return skm.labels_
-
 
 def _create_bow(idx2word, doc_path):
     rows=[]
@@ -76,7 +72,6 @@ def _create_bow(idx2word, doc_path):
                 vals.append(float(count))
     return csr_matrix((vals, (rows, cols)), shape=(i+1, len(word2idx)))
 
-
 def _create_w2c(idx2word, cluster_label, num_concept):
     if len(idx2word)!=len(cluster_label):
         raise IndexError("Dimensions between words and labels mismatched")
@@ -87,7 +82,6 @@ def _create_w2c(idx2word, cluster_label, num_concept):
 
     return csr_matrix((vals, (rows, cols)), shape=(len(idx2word), num_concept))
 
-
 def _apply_cfidf(csr_matrix):
     num_docs, num_concepts=csr_matrix.shape
     _, nz_concept_idx=csr_matrix.nonzero()
@@ -96,12 +90,10 @@ def _apply_cfidf(csr_matrix):
     icf[np.isinf(icf)]=0
     return safe_sparse_dot(csr_matrix, scipy.sparse.diags(icf))
 
-
 def tokenize(doc_path):
     with open(doc_path, "r") as f:
         for doc in f:
             yield doc.rstrip().split(" ")
-
 
 def train_w2v(doc_path, embedding_dim, context, min_freq, iterations, save_path=""):
     tokenized_docs=tokenize(doc_path)
@@ -114,7 +106,6 @@ def train_w2v(doc_path, embedding_dim, context, min_freq, iterations, save_path=
         model.wv.save_word2vec_format(save_path+model_name)
 
     return model.wv.vectors, model.wv.index2word
-
 
 def load_w2v(model_path):
     return KeyedVectors.load_word2vec_format(model_path)
