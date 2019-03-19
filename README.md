@@ -21,5 +21,5 @@ import bagofconcepts as boc
 boc_model=boc.BOCModel(doc_path="input corpus path")
 
 # output can be saved with save_path parameter
-boc_matrix,word2concept_list,idx2word_converter=a.fit()
+boc_matrix,word2concept_list,idx2word_converter=boc_model.fit()
 ```
