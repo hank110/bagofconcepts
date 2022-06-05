@@ -1,6 +1,4 @@
 import os
-import psutil
-
 from gensim.models import Word2Vec, KeyedVectors
 
 def create_corpus(doc_path):
@@ -23,16 +21,3 @@ def train_gensim_w2v(corpus, embedding_dim, context, min_freq, iterations, save_
         model.wv.save_word2vec_format(save_path+model_name)
 
     return model.wv.vectors, model.wv.index_to_key
-
-# This code is provided by Hyunjoong Kim
-def get_available_memory():
-    """It returns remained memory as percentage"""
-
-    mem = psutil.virtual_memory()
-    return 100 * mem.available / (mem.total)
-
-def get_process_memory():
-    """It returns the memory usage of current process"""
-    
-    process = psutil.Process(os.getpid())
-    return process.memory_info().rss / (1024 ** 3)
